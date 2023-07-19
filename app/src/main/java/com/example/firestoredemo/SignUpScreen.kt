@@ -48,6 +48,20 @@ fun SignUpScreen(
         )
 
         OutlinedTextField(
+            value = signUpViewModel.state.value.fullname,
+            onValueChange = { signUpViewModel.setFullName(it) },
+            placeholder = {
+                Text(
+                    text = "Full Name"
+                )
+            }
+        )
+
+        Spacer(
+            modifier = Modifier.height(16.dp)
+        )
+
+        OutlinedTextField(
             value = signUpViewModel.state.value.email,
             onValueChange = { signUpViewModel.setEmail(it) },
             placeholder = {

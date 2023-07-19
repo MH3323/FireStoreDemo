@@ -10,6 +10,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuthException
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
@@ -17,6 +18,7 @@ import kotlinx.coroutines.tasks.await
 public class LoginScreenViewModel : ViewModel() {
     val auth = Firebase.auth
     val state = mutableStateOf(User())
+    val db = Firebase.firestore
 
     fun setEmail(value: String) {
         state.value = state.value.copy(email = value) // use copy for just changing the email value, the remain properties still intact
@@ -33,7 +35,25 @@ public class LoginScreenViewModel : ViewModel() {
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     Log.d(TAG, "Successfully log in")
-                    goToHomePage()
+                    val temp = auth.currentUser
+                    if(temp != null) {
+                        val uid = temp.uid
+                        db.collection("user").document(uid).get()
+                            .addOnSuccessListener { documentSnapshot ->
+                                if (documentSnapshot.exists()) {
+                                    // The document exists, you can access its data
+                                    // Handle the data as needed
+                                    val user = documentSnapshot.toObject(User::class.java)
+                                    goToHomePage()
+                                } else {
+                                    // The document doesn't exist
+                                    // Handle this case if needed
+                                }
+                            }
+                            .addOnFailureListener { exception ->
+                                // Handle any errors that occurred while fetching the document
+                            }
+                    }
                 } else {
                     val exception = task.exception
                     Log.d(TAG, exception.toString())

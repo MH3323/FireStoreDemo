@@ -6,4 +6,5 @@ import androidx.compose.runtime.Composable
 @Composable
 fun HomePageScreen() {
     Text(text = "Homepage")
+    Text(text = "Welcome back")
 }
