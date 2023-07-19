@@ -43,13 +43,11 @@ class MainActivity : ComponentActivity() {
 
                 FireStoreDemoTheme {
                     // A surface container using the 'background' color from the theme
-                    val viewModel = viewModel<LoginScreenViewModel>()
-
                     Surface(
                         modifier = Modifier.fillMaxSize(),
                         color = MaterialTheme.colorScheme.background
                     ) {
-                        LoginScreen(loginScreenViewModel = viewModel)
+                        App()
                     }
                 }
         }

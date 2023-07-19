@@ -14,34 +14,28 @@ import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
-data class User(val email: String, val password: String)
-
 public class LoginScreenViewModel : ViewModel() {
     val auth = Firebase.auth
-    val email = mutableStateOf("")
-    val password = mutableStateOf("")
-    val showError = mutableStateOf(false)
-    val errorMessage = mutableStateOf("")
+    val state = mutableStateOf(User())
 
     fun setEmail(value: String) {
-        email.value = value
+        state.value = state.value.copy(email = value) // use copy for just changing the email value, the remain properties still intact
     }
 
     fun setPassword(value: String) {
-        password.value = value
+        state.value = state.value.copy(password = value)
     }
 
-    fun login() {
-        auth.signInWithEmailAndPassword(email.value, password.value)
+    fun login(
+        goToHomePage: () -> Unit
+    ) {
+        auth.signInWithEmailAndPassword(state.value.email, state.value.password)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     Log.d(TAG, "Successfully log in")
+                    goToHomePage()
                 } else {
                     val exception = task.exception
-                    if (exception is FirebaseAuthException) {
-                        showError.value = true
-                        errorMessage.value = exception.localizedMessage ?: "Unknown error occurred"
-                    }
                     Log.d(TAG, exception.toString())
                 }
             }
