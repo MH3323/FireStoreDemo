@@ -12,41 +12,46 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.firestoredemo.ui.theme.FireStoreDemoTheme
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 
 class MainActivity : ComponentActivity() {
 
-    val db = Firebase.firestore
+//    val db = Firebase.firestore
+
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
             setContent {
 
-                val user = hashMapOf(
-                "first" to "Huy",
-                "last" to "Huynh",
-                "born" to 2003
-            )
-            db.collection("users")
-                .add(user)
-                .addOnSuccessListener { documentReference ->
-                    Log.d(TAG, "DocumentSnapshot added with ID: ${documentReference.id}")
-                }
-                .addOnFailureListener { e ->
-                    Log.w(TAG, "Error adding document", e)
-                }
+//                val user = hashMapOf(
+//                    "first" to "Niennnnnnnnnnnnnnnnnnnnnnnn",
+//                    "last" to "Huynh",
+//                    "born" to 2003
+//                )
+//                db.collection("users")
+//                    .add(user)
+//                    .addOnSuccessListener { documentReference ->
+//                        Log.d(TAG, "DocumentSnapshot added with ID: ${documentReference.id}")
+//                    }
+//                    .addOnFailureListener { e ->
+//                        Log.w(TAG, "Error adding document", e)
+//                    }
 
-            FireStoreDemoTheme {
-                // A surface container using the 'background' color from the theme
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    Greeting("Android")
+                FireStoreDemoTheme {
+                    // A surface container using the 'background' color from the theme
+                    val viewModel = viewModel<LoginScreenViewModel>()
+
+                    Surface(
+                        modifier = Modifier.fillMaxSize(),
+                        color = MaterialTheme.colorScheme.background
+                    ) {
+                        LoginScreen(loginScreenViewModel = viewModel)
+                    }
                 }
-            }
         }
     }
 }
