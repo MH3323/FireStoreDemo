@@ -18,6 +18,8 @@ fun App() {
         addLoginScreen(navController = navController)
         addSignUpScreen(navController = navController)
         addHomePageScreen(navController = navController)
+        addLoginSuccessfullyScreen(navController = navController)
+        addSignUpSuccessfullyScreen(navController = navController)
     }
 }
 
@@ -43,6 +45,19 @@ private fun NavGraphBuilder.addSignUpScreen(navController: NavController) {
 
 private fun NavGraphBuilder.addHomePageScreen(navController: NavController) {
     composable("homePageScreen") {
+//        val homePageViewModel = viewModel<HomePageViewModel>()
         HomePageScreen()
+    }
+}
+
+private fun NavGraphBuilder.addLoginSuccessfullyScreen(navController: NavController) {
+    composable("loginSuccessfullyScreen") {
+        LoginSuccessfullyScreen(navController = navController)
+    }
+}
+
+private fun NavGraphBuilder.addSignUpSuccessfullyScreen(navController: NavController) {
+    composable("signUpSuccessfullyScreen") {
+        SignUpSuccessfullyScreen(navController = navController)
     }
 }

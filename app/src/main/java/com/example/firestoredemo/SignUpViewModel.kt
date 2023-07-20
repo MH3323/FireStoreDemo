@@ -14,8 +14,8 @@ data class SignUpState(
     val email: String = "",
     val password: String = "",
     val confirmPassword: String = "",
-    val passwordMatchError: Boolean = true,
-    val errorMessage: String = "",
+    val passwordMatch: Boolean = true,
+    val error: String = "",
 )
 
 class SignUpViewModel : ViewModel(){
@@ -35,11 +35,16 @@ class SignUpViewModel : ViewModel(){
         state.value = state.value.copy(confirmPassword = value)
     }
 
-    fun confirmPassword(value: String) {
-        if (state.value.password != value) {
-            state.value = state.value.copy(passwordMatchError = false)
+    fun confirmPassword(
+        goToHomePage: () -> Unit
+    ) {
+        if (state.value.password != state.value.confirmPassword) {
+            state.value = state.value.copy(error = "Password does not match")
         } else {
-            state.value = state.value.copy(passwordMatchError = true)
+            state.value = state.value.copy(error = "")
+            signUp {
+                goToHomePage()
+            }
         }
     }
 
@@ -48,9 +53,18 @@ class SignUpViewModel : ViewModel(){
         state.value = state.value.copy(fullname = value)
     }
 
+    fun verify(): Boolean {
+        return state.value.fullname.isNotEmpty() && state.value.email.isNotEmpty() && state.value.password.isNotEmpty() && state.value.confirmPassword.isNotEmpty()
+    }
+
+    fun setError(error: String) {
+        state.value = state.value.copy(error = error)
+    }
+
     fun signUp(
         goToHomePage: () -> Unit,
     ) {
+        // create new account in authentication custom email/password
         auth.createUserWithEmailAndPassword(state.value.email, state.value.password)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
@@ -58,25 +72,25 @@ class SignUpViewModel : ViewModel(){
                     val user: FirebaseUser? = auth.currentUser
                     if(user != null)
                     {
-                        val temp = hashMapOf(
-                            "fullName" to state.value.fullname,
-                            "email" to state.value.email,
-                            "password" to state.value.password,
-                            "role" to "jobfinder"
-
+//                        val temp = hashMapOf(
+//                            "fullName" to state.value.fullname,
+//                            "email" to state.value.email,
+//                            "password" to state.value.password,
+//                            "role" to "jobfinder"
+//                        )
+                        val newUser: User = User(
+                            fullName = state.value.fullname,
+                            email = state.value.email,
+                            password = state.value.password,
+                            role = "jobfinder"
                         )
-                        db.collection("user").document(user.uid)
-                            .set(temp)
-                            .addOnSuccessListener { documentReference
-                                -> Log.d(TAG, "Add successfully data for user ${user.uid}")  }
-                            .addOnFailureListener{ e ->
-                                Log.d(TAG, "Error")
-                            }
+                        addNewUserInfoToFireStoreWithUID(user.uid, newUser)
                     }
+
                     goToHomePage()
                 } else {
                     Log.d(TAG, task.exception.toString())
-                    state.value = state.value.copy(errorMessage = task.exception.toString())
+                    state.value = state.value.copy(error = task.exception.toString())
                 }
             }
     }

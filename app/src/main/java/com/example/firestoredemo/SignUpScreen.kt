@@ -30,6 +30,8 @@ fun SignUpScreen(
     navController: NavController,
     signUpViewModel: SignUpViewModel
 ) {
+    val state = signUpViewModel.state.value
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -48,7 +50,7 @@ fun SignUpScreen(
         )
 
         OutlinedTextField(
-            value = signUpViewModel.state.value.fullname,
+            value = state.fullname,
             onValueChange = { signUpViewModel.setFullName(it) },
             placeholder = {
                 Text(
@@ -62,7 +64,7 @@ fun SignUpScreen(
         )
 
         OutlinedTextField(
-            value = signUpViewModel.state.value.email,
+            value = state.email,
             onValueChange = { signUpViewModel.setEmail(it) },
             placeholder = {
                 Text(
@@ -76,7 +78,7 @@ fun SignUpScreen(
         )
 
         OutlinedTextField(
-            value = signUpViewModel.state.value.password,
+            value = state.password,
             onValueChange = { signUpViewModel.setPassword(it) },
             placeholder = {
                 Text(
@@ -90,7 +92,7 @@ fun SignUpScreen(
         )
 
         OutlinedTextField(
-            value = signUpViewModel.state.value.confirmPassword,
+            value = state.confirmPassword,
             onValueChange = { signUpViewModel.setConfirmPassword(it) },
             placeholder = {
                 Text(
@@ -99,23 +101,13 @@ fun SignUpScreen(
             }
         )
 
-        if (!signUpViewModel.state.value.passwordMatchError) {
-            Spacer(
-              modifier = Modifier.height(16.dp)
-            )
-            Text(
-                text = "Password does not match",
-                color = MaterialTheme.colorScheme.error,
-            )
-        }
-
-        if (signUpViewModel.state.value.errorMessage != "") {
+        if (state.error != "") {
             Spacer(
               modifier = Modifier.height(16.dp)
             )
 
             Text(
-                text = signUpViewModel.state.value.errorMessage,
+                text = state.error,
                 color = MaterialTheme.colorScheme.error
             )
         }
@@ -125,11 +117,12 @@ fun SignUpScreen(
         )
 
         Button(onClick = {
-            signUpViewModel.confirmPassword(signUpViewModel.state.value.confirmPassword)
-            if (signUpViewModel.state.value.passwordMatchError) {
-                signUpViewModel.signUp {
-                    navController.navigate("homePageScreen")
+            if (signUpViewModel.verify()) {
+                signUpViewModel.confirmPassword {
+                    navController.navigate("SignUpSuccessfullyScreen")
                 }
+            } else {
+                signUpViewModel.setError("Some of the fields has not been filled yet")
             }
         }) {
             Text(

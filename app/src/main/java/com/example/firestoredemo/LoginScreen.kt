@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -29,6 +30,7 @@ fun LoginScreen(
     navController: NavController,
     loginScreenViewModel: LoginScreenViewModel
 ) {
+    val state = loginScreenViewModel.state.value
 
     Column(
         modifier = modifier
@@ -48,7 +50,7 @@ fun LoginScreen(
         )
 
         OutlinedTextField(
-            value = loginScreenViewModel.state.value.email,
+            value = state.email,
             onValueChange = { loginScreenViewModel.setEmail(it) },
             placeholder = {
                 Text(
@@ -62,7 +64,7 @@ fun LoginScreen(
         )
 
         OutlinedTextField(
-            value = loginScreenViewModel.state.value.password,
+            value = state.password,
             onValueChange = { loginScreenViewModel.setPassword(it) },
             placeholder = {
                 Text(
@@ -71,13 +73,29 @@ fun LoginScreen(
             }
         )
 
+        if (state.error != "") {
+            Spacer(
+                modifier = Modifier.height(16.dp)
+            )
+
+            Text(
+                text = state.error,
+                color = MaterialTheme.colorScheme.error
+            )
+        }
+
         Spacer(
             modifier = Modifier.height(16.dp)
         )
 
         Button(onClick = {
-            loginScreenViewModel.login {
-                navController.navigate("homePageScreen")
+            if (loginScreenViewModel.verify()) {
+                loginScreenViewModel.login{
+                    navController.navigate("loginSuccessfullyScreen")
+                }
+            }
+            else {
+                loginScreenViewModel.setError("The input field is not fill yet")
             }
         }) {
             Text(
