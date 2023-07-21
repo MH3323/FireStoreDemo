@@ -1,5 +1,6 @@
 package com.example.firestoredemo
 
+import androidx.activity.ComponentActivity
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -19,7 +20,9 @@ fun App() {
         addSignUpScreen(navController = navController)
         addHomePageScreen(navController = navController)
         addLoginSuccessfullyScreen(navController = navController)
-        addSignUpSuccessfullyScreen(navController = navController)
+        addSignUpSuccessfullyScreen(
+            navController = navController,
+        )
     }
 }
 
@@ -38,7 +41,7 @@ private fun NavGraphBuilder.addSignUpScreen(navController: NavController) {
         val signUpViewModel = viewModel<SignUpViewModel>()
         SignUpScreen(
             signUpViewModel = signUpViewModel,
-            navController = navController
+            navController = navController,
         )
     }
 }
@@ -56,7 +59,9 @@ private fun NavGraphBuilder.addLoginSuccessfullyScreen(navController: NavControl
     }
 }
 
-private fun NavGraphBuilder.addSignUpSuccessfullyScreen(navController: NavController) {
+private fun NavGraphBuilder.addSignUpSuccessfullyScreen(
+    navController: NavController,
+) {
     composable("signUpSuccessfullyScreen") {
         SignUpSuccessfullyScreen(navController = navController)
     }
