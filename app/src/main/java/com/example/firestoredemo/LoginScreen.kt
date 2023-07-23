@@ -73,30 +73,31 @@ fun LoginScreen(
             }
         )
 
-        if (state.error != "") {
-            Spacer(
-                modifier = Modifier.height(16.dp)
-            )
-
-            Text(
-                text = state.error,
-                color = MaterialTheme.colorScheme.error
-            )
-        }
+//        if (state.error != "") {
+//            Spacer(
+//                modifier = Modifier.height(16.dp)
+//            )
+//
+//            Text(
+//                text = state.error,
+//                color = MaterialTheme.colorScheme.error
+//            )
+//        }
 
         Spacer(
             modifier = Modifier.height(16.dp)
         )
 
         Button(onClick = {
-            if (loginScreenViewModel.verify()) {
-                loginScreenViewModel.login{
-                    navController.navigate("loginSuccessfullyScreen")
-                }
+            loginScreenViewModel.login{
+                navController.navigate("loginSuccessfullyScreen")
             }
-            else {
-                loginScreenViewModel.setError("The input field is not fill yet")
-            }
+//            if (loginScreenViewModel.verify()) {
+//
+//            }
+//            else {
+//                loginScreenViewModel.setError("The input field is not fill yet")
+//            }
         }) {
             Text(
                 text = "Login"
