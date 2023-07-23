@@ -24,7 +24,7 @@ fun SignUpSuccessfullyScreen(
         Spacer(modifier = Modifier.height(16.dp))
         Button(
             onClick = {
-                navController.navigate("homePageScreen")
+                navController.navigate("loginScreen")
             }
         ) {
             Text(

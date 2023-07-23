@@ -1,5 +1,6 @@
 package com.example.firestoredemo
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -73,31 +74,33 @@ fun LoginScreen(
             }
         )
 
-//        if (state.error != "") {
-//            Spacer(
-//                modifier = Modifier.height(16.dp)
-//            )
-//
-//            Text(
-//                text = state.error,
-//                color = MaterialTheme.colorScheme.error
-//            )
-//        }
+        if (state.error != "") {
+            Spacer(
+                modifier = Modifier.height(16.dp)
+            )
+
+            Text(
+                text = state.error,
+                color = MaterialTheme.colorScheme.error
+            )
+        }
 
         Spacer(
             modifier = Modifier.height(16.dp)
         )
 
         Button(onClick = {
-            loginScreenViewModel.login{
-                navController.navigate("loginSuccessfullyScreen")
+            Log.d("login", state.email)
+            Log.d("login", state.password)
+
+            if (loginScreenViewModel.verify()) {
+                loginScreenViewModel.login{
+                    navController.navigate("loginSuccessfullyScreen")
+                }
             }
-//            if (loginScreenViewModel.verify()) {
-//
-//            }
-//            else {
-//                loginScreenViewModel.setError("The input field is not fill yet")
-//            }
+            else {
+                loginScreenViewModel.setError("The input field is not fill yet")
+            }
         }) {
             Text(
                 text = "Login"

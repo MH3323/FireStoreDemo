@@ -15,9 +15,15 @@ import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
+data class LoginScreenState(
+    val email: String = "",
+    val password: String = "",
+    val error: String = "",
+)
+
 public class LoginScreenViewModel : ViewModel() {
     val auth = Firebase.auth
-    val state = mutableStateOf(User())
+    val state = mutableStateOf(LoginScreenState())
     val db = Firebase.firestore
 
     fun setEmail(value: String) {
@@ -26,6 +32,17 @@ public class LoginScreenViewModel : ViewModel() {
 
     fun setPassword(value: String) {
         state.value = state.value.copy(password = value)
+    }
+
+    fun verify(): Boolean {
+        if (state.value.email.isNotEmpty() && state.value.password.isNotEmpty()) {
+            return true
+        }
+        return false
+    }
+
+    fun setError(error: String) {
+        state.value = state.value.copy(error = error)
     }
 
     fun login(
@@ -45,7 +62,6 @@ public class LoginScreenViewModel : ViewModel() {
                                         // The document exists, you can access its data
                                         // Handle the data as needed
                                         val user = documentSnapshot.toObject(User::class.java)
-                                        goToHomePage()
                                     } else {
                                         // The document doesn't exist
                                         // Handle this case if needed
@@ -54,12 +70,20 @@ public class LoginScreenViewModel : ViewModel() {
                                 .addOnFailureListener { exception ->
                                     // Handle any errors that occurred while fetching the document
                                 }
+                            goToHomePage()
                         }
                     } else {
                         val exception = task.exception
                         Log.d(TAG, exception.toString())
+                        setError(exception.toString())
                     }
+                } else {
+                    setError("Please confirm your email")
                 }
+            }
+            .addOnFailureListener { e ->
+                Log.d(TAG, e.toString())
+                setError(e.toString())
             }
     }
 
