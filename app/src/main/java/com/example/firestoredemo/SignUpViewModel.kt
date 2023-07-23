@@ -4,12 +4,14 @@ import android.content.ContentValues.TAG
 import android.graphics.Bitmap
 import android.net.Uri
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
@@ -82,9 +84,8 @@ class SignUpViewModel : ViewModel(){
     ) {
         // create new account in authentication custom email/password
         auth.createUserWithEmailAndPassword(state.value.email, state.value.password)
-            .addOnCompleteListener { task ->
+            .addOnCompleteListener() { task ->
                 if (task.isSuccessful) {
-                    Log.d(TAG, "Successfully create account")
                     val user: FirebaseUser? = auth.currentUser
                     if(user != null)
                     {
@@ -97,8 +98,12 @@ class SignUpViewModel : ViewModel(){
                             role = "jobfinder",
                             imgUrl = imgUrl.value,
                         )
-
                         addNewUserInfoToFireStoreWithUID(user.uid, newUser)
+                        auth.currentUser?.sendEmailVerification()
+                            ?.addOnSuccessListener {
+                                Log.d("Email verify", "Send email successfully")
+                            }
+                        Log.d(TAG, "Successfully create account")
                     }
 
                     goToHomePage()

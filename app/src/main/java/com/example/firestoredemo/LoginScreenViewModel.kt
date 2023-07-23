@@ -2,7 +2,6 @@ package com.example.firestoredemo
 
 import android.content.ContentValues.TAG
 import android.util.Log
-import android.widget.Toast
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -16,14 +15,9 @@ import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
-data class LoginScreenState(
-    val email: String = "",
-    val password: String = "",
-    val error: String = "",
-)
-public class LoginScreenViewModel() : ViewModel() {
+public class LoginScreenViewModel : ViewModel() {
     val auth = Firebase.auth
-    val state = mutableStateOf(LoginScreenState())
+    val state = mutableStateOf(User())
     val db = Firebase.firestore
 
     fun setEmail(value: String) {
@@ -34,30 +28,39 @@ public class LoginScreenViewModel() : ViewModel() {
         state.value = state.value.copy(password = value)
     }
 
-    fun verify(): Boolean {
-        if (state.value.email.isNotEmpty() && state.value.password.isNotEmpty()) {
-            return true
-        }
-        return false
-    }
-
-    fun setError(error: String) {
-        state.value = state.value.copy(error = error)
-    }
-
     fun login(
-        goToLoginSuccessfullyScreen: () -> Unit
+        goToHomePage: () -> Unit
     ) {
-       signInWithFirebaseAuthentication(
-           onSuccess = {
-               goToLoginSuccessfullyScreen()
-           },
-           onFailure = { error ->
-               state.value = state.value.copy(error = error)
-           },
-           email = state.value.email,
-           password = state.value.password
-       )
+        auth.signInWithEmailAndPassword(state.value.email, state.value.password)
+            .addOnCompleteListener { task ->
+                if (auth.currentUser?.isEmailVerified() == true) {
+                    if (task.isSuccessful) {
+                        Log.d(TAG, "Successfully log in")
+                        val temp = auth.currentUser
+                        if (temp != null) {
+                            val uid = temp.uid
+                            db.collection("user").document(uid).get()
+                                .addOnSuccessListener { documentSnapshot ->
+                                    if (documentSnapshot.exists()) {
+                                        // The document exists, you can access its data
+                                        // Handle the data as needed
+                                        val user = documentSnapshot.toObject(User::class.java)
+                                        goToHomePage()
+                                    } else {
+                                        // The document doesn't exist
+                                        // Handle this case if needed
+                                    }
+                                }
+                                .addOnFailureListener { exception ->
+                                    // Handle any errors that occurred while fetching the document
+                                }
+                        }
+                    } else {
+                        val exception = task.exception
+                        Log.d(TAG, exception.toString())
+                    }
+                }
+            }
     }
 
 }

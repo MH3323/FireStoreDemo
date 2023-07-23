@@ -86,7 +86,6 @@ fun uploadImageToFirebase(
             if (inputStream != null) {
                 val imageBytes = inputStream.readBytes()
                 val fileName = "image_${System.currentTimeMillis()}.jpg"
-
                 val storageReference = Firebase.storage.reference.child("images/$fileName")
                 val uploadTask = storageReference.putBytes(imageBytes)
                     .addOnSuccessListener {
