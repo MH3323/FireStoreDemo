@@ -190,7 +190,12 @@ fun SignUpScreen(
                                     )
                                 },
                                 onFailure = {
-                                    signUpViewModel.onFailedUploadImage(it)
+                                    signUpViewModel.onFailedUploadImage(
+                                        it,
+                                        goToHomePage = {
+                                                navController.navigate("signUpSuccessfullyScreen")
+                                        }
+                                    )
                                 }
                             )
                 }

@@ -3,6 +3,8 @@ package com.example.firestoredemo
 import android.content.ContentResolver
 import android.content.ContentValues.TAG
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.util.Log
 import android.widget.Toast
@@ -12,6 +14,9 @@ import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.ktx.storage
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import java.io.File
 import java.io.InputStream
@@ -90,9 +95,12 @@ fun uploadImageToFirebase(
                 val storageReference = Firebase.storage.reference.child("images/$fileName")
                 val uploadTask = storageReference.putBytes(imageBytes)
                     .addOnSuccessListener {
-                        val downloadUrl = storageReference.downloadUrl.toString()
-                        Log.d("upload image", "successfully upload image to firebase: " + downloadUrl)
-                        onSuccess(downloadUrl)
+                        storageReference.downloadUrl.addOnSuccessListener {
+                            val downloadUrl = it.toString()
+                            Log.d("upload image", "successfully upload image to firebase: " + downloadUrl)
+                            onSuccess(downloadUrl)
+                        }
+
                     }
                     .addOnFailureListener { e ->
                         onFailure(e.toString())
@@ -103,6 +111,31 @@ fun uploadImageToFirebase(
         } else {
             onFailure("ImgURI is null")
         }
+}
+
+fun getImageFromFirebase(
+    imageUrl: String,
+    onImageFetched: (Bitmap) -> Unit
+) {
+        GlobalScope.launch(Dispatchers.IO) {
+            Log.d("userimage", "in getImageFromFirebase: " + imageUrl)
+            val storageReference = Firebase.storage.reference.child(imageUrl)
+            val maxImageSize: Long = 1024 * 1024 * 5 // max 5MB
+            storageReference.getBytes(maxImageSize)
+                .addOnSuccessListener {
+                    val byteArray = it
+                    val bitmap = byteArrayToBitmap(byteArray)
+                    onImageFetched(bitmap)
+                    Log.d("userimage", "successfully")
+                }
+                .addOnFailureListener { e ->
+                    Log.d("userimage", e.toString())
+                }
+        }
+}
+
+fun byteArrayToBitmap(byteArray: ByteArray): Bitmap {
+    return BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
 }
 
 

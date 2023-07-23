@@ -130,7 +130,13 @@ class SignUpViewModel : ViewModel(){
         }
     }
 
-    fun onFailedUploadImage(msg: String) {
+    fun onFailedUploadImage(
+        msg: String,
+        goToHomePage: () -> Unit
+    ) {
         Log.w("Upload Image", msg)
+        signUp {
+            goToHomePage()
+        }
     }
 }

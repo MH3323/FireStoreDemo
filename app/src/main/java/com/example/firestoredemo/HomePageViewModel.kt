@@ -1,8 +1,10 @@
 package com.example.firestoredemo
 
+import android.graphics.Bitmap
 import android.nfc.Tag
 import android.util.Log
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.ktx.auth
@@ -15,10 +17,15 @@ import kotlinx.coroutines.tasks.await
 
 data class HomePageState(
     val error: String = "",
+    val userImage: Bitmap? = null
 )
 
 class HomePageViewModel : ViewModel() {
-    val state = mutableStateOf(HomePageState())
+    val state = mutableStateOf<HomePageState>(HomePageState())
+
+    private val _userImage = MutableStateFlow<String?>(null)
+    val userImage: StateFlow<String?>
+        get() = _userImage
 
     private val _userInformation = MutableStateFlow<User?>(null)
     val userInformation: StateFlow<User?>
@@ -30,6 +37,19 @@ class HomePageViewModel : ViewModel() {
         getUserInformationFromFireStore(
             onSuccess = { userInformation ->
                 _userInformation.value = userInformation
+
+                _userInformation.value?.imgUrl?.let { it ->
+                    Log.d("userimage", it)
+                    _userImage.value = it
+//                    getImageFromFirebase(
+//                        it,
+//                        onImageFetched = { image ->
+//                            _userImage.value = image
+//                        }
+//                    )
+
+                }
+
             },
             onFailure = {
                 state.value = state.value.copy(error = it)
@@ -39,28 +59,4 @@ class HomePageViewModel : ViewModel() {
     }
 
 
-
-//    init{
-////
-//        val user = auth.currentUser
-//        if (user != null) {
-//            val userRef = db.collection("users").document(user.uid)
-//            userRef.get()
-//                .addOnSuccessListener { userSnapShot ->
-//                    if (userSnapShot.exists()) {
-//                        state.value = state.value.copy(user = User(
-//                            fullName = userSnapShot.getString("fullName") ?: "",
-//                        ))
-//                        Log.d("homepage", "success display")
-//                    }
-//                }
-//                .addOnFailureListener { e ->
-//                    state.value = state.value.copy(error = e.toString())
-//                    Log.d("homepage", e.toString())
-//                }
-//        } else {
-//            state.value = state.value.copy(error = "User not found")
-//            Log.d("homepage", "User not found")
-//        }
-//    }
 }
