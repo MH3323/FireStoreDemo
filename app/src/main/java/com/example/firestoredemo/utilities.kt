@@ -2,23 +2,12 @@ package com.example.firestoredemo
 
 import android.content.ContentResolver
 import android.content.ContentValues.TAG
-import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.net.Uri
 import android.util.Log
-import android.widget.Toast
-import androidx.compose.ui.platform.LocalContext
-import androidx.core.app.NotificationCompat
-import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.ktx.storage
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
-import java.io.File
 import java.io.InputStream
 
 
@@ -34,29 +23,29 @@ fun addNewUserInfoToFireStoreWithUID(uid: String, newUser: User) {
         }
 }
 
-fun signInWithFirebaseAuthentication(
-    onSuccess: () -> Unit,
-    onFailure: (String) -> Unit,
-    email: String,
-    password: String
-) {
-    val auth = Firebase.auth
-    auth.signInWithEmailAndPassword(email, password)
-        .addOnCompleteListener { task ->
-            if (task.isSuccessful) {
-                Log.d(TAG, "Successfully log in")
-                onSuccess()
-            }
-            else {
-                val exception = task.exception
-                Log.d(TAG, exception.toString())
-                onFailure(exception.toString())
-            }
-        }
-        .addOnFailureListener { e ->
-            onFailure(e.toString())
-        }
-}
+//fun signInWithFirebaseAuthentication(
+//    onSuccess: () -> Unit,
+//    onFailure: (String) -> Unit,
+//    email: String,
+//    password: String
+//) {
+//    val auth = Firebase.auth
+//    auth.signInWithEmailAndPassword(email, password)
+//        .addOnCompleteListener { task ->
+//            if (task.isSuccessful) {
+//                Log.d(TAG, "Successfully log in")
+//                onSuccess()
+//            }
+//            else {
+//                val exception = task.exception
+//                Log.d(TAG, exception.toString())
+//                onFailure(exception.toString())
+//            }
+//        }
+//        .addOnFailureListener { e ->
+//            onFailure(e.toString())
+//        }
+//}
 
 fun getUserInformationFromFireStore(
     uid: String,
@@ -112,29 +101,91 @@ fun uploadImageToFirebase(
         }
 }
 
-fun getImageFromFirebase(
-    imageUrl: String,
-    onImageFetched: (Bitmap) -> Unit
+//fun getImageFromFirebase(
+//    imageUrl: String,
+//    onImageFetched: (Bitmap) -> Unit
+//) {
+//        GlobalScope.launch(Dispatchers.IO) {
+//            Log.d("userimage", "in getImageFromFirebase: " + imageUrl)
+//            val storageReference = Firebase.storage.reference.child(imageUrl)
+//            val maxImageSize: Long = 1024 * 1024 * 5 // max 5MB
+//            storageReference.getBytes(maxImageSize)
+//                .addOnSuccessListener {
+//                    val byteArray = it
+//                    val bitmap = byteArrayToBitmap(byteArray)
+//                    onImageFetched(bitmap)
+//                    Log.d("userimage", "successfully")
+//                }
+//                .addOnFailureListener { e ->
+//                    Log.d("userimage", e.toString())
+//                }
+//        }
+//}
+
+//fun byteArrayToBitmap(byteArray: ByteArray): Bitmap {
+//    return BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
+//}
+
+fun getCompanyInformationFromFirebase(
+    companyId: String,
+    onSuccess: (Company?) -> Unit,
+    onFailure: (String) -> Unit,
 ) {
-        GlobalScope.launch(Dispatchers.IO) {
-            Log.d("userimage", "in getImageFromFirebase: " + imageUrl)
-            val storageReference = Firebase.storage.reference.child(imageUrl)
-            val maxImageSize: Long = 1024 * 1024 * 5 // max 5MB
-            storageReference.getBytes(maxImageSize)
-                .addOnSuccessListener {
-                    val byteArray = it
-                    val bitmap = byteArrayToBitmap(byteArray)
-                    onImageFetched(bitmap)
-                    Log.d("userimage", "successfully")
-                }
-                .addOnFailureListener { e ->
-                    Log.d("userimage", e.toString())
-                }
+    val companyDocumentPath = "companies/$companyId"
+    val db = Firebase.firestore
+
+    db.document(companyDocumentPath).get()
+        .addOnSuccessListener { documentSnapshot ->
+            if (documentSnapshot.exists()) {
+                val companyInformation = documentSnapshot.toObject(Company::class.java)
+                onSuccess(companyInformation)
+            } else {
+                onFailure("Document does not exist")
+            }
+        }
+        .addOnFailureListener {
+            onFailure(it.toString())
         }
 }
 
-fun byteArrayToBitmap(byteArray: ByteArray): Bitmap {
-    return BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
+fun getJobListFromFirebase(
+    onSuccess: (List<Job>) -> Unit,
+    onFailure: (String) -> Unit
+) {
+    val companyDocumentPath = "jobs"
+    val db = Firebase.firestore
+
+    db.collection(companyDocumentPath).get()
+        .addOnSuccessListener { snapshot ->
+                val jobs = mutableListOf<Job>()
+
+                for (document in snapshot.documents) {
+                    jobs.add(Job.fromFirestore(document))
+                }
+
+                onSuccess(jobs)
+        }
+        .addOnFailureListener {
+            onFailure(it.toString())
+        }
+}
+
+fun getJobByIdFromFirebase(
+    id: String,
+    onSuccess: (Job?) -> Unit,
+    onFailure: (String) -> Unit,
+) {
+    val jobDocumentPath = "jobs/" + id
+    val db = Firebase.firestore
+
+    db.document(jobDocumentPath).get()
+        .addOnSuccessListener { snapshot ->
+            val job = snapshot.toObject(Job::class.java)
+            onSuccess(job)
+        }
+        .addOnFailureListener {
+            onFailure(it.toString())
+        }
 }
 
 

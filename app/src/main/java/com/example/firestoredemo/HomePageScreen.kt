@@ -1,44 +1,41 @@
 package com.example.firestoredemo
 
-import android.graphics.Bitmap
 import android.util.Log
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.graphics.painter.BitmapPainter
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import coil.ImageLoader
-import coil.compose.rememberAsyncImagePainter
 import coil.compose.rememberImagePainter
-import coil.request.ImageRequest
 import coil.size.Scale
 import com.example.firestoredemo.ui.theme.FireStoreDemoTheme
-import com.google.common.math.Quantiles.scale
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 
@@ -66,6 +63,28 @@ fun ImageFromDatabaseDisplay(imageUrl: String) {
         modifier = Modifier
             .size(100.dp)
     )
+}
+
+@Composable
+fun JobList(
+    jobs: List<Job>,
+    onUserClicked: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    LazyColumn(
+        modifier = modifier
+    ) {
+        items(jobs) { job ->
+            JobCard(
+                job = job,
+                modifier = Modifier
+                    .padding(8.dp)
+                    .clickable {
+                        onUserClicked(job.id)
+                    }
+            )
+        }
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -117,8 +136,43 @@ fun AppBarPreview() {
 }
 
 @Composable
+fun JobCard(
+    job: Job = Job(),
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier
+            .shadow(
+                elevation = 10.dp,
+                shape = RoundedCornerShape(10.dp)
+            )
+    ) {
+            Row(
+                modifier = Modifier.padding(12.dp)
+            ) {
+                Image(
+                    painter = painterResource(R.drawable.ic_launcher_background),
+                    contentDescription =  "Company image",
+                    modifier = Modifier
+                        .size(50.dp)
+                )
+                Column() {
+                    Text(
+                        text = "Job name: " + job.name
+                    )
+                    Text(
+                        text = "Company Name: " + job.companyName
+                    )
+                }
+            }
+        }
+}
+
+
+@Composable
 fun HomePageScreen(
-    homePageViewModel: HomePageViewModel = viewModel<HomePageViewModel>()
+    homePageViewModel: HomePageViewModel = viewModel<HomePageViewModel>(),
+    navController: NavController
 ) {
     val state = homePageViewModel.state.value
     val currentUser = Firebase.auth.currentUser
@@ -134,9 +188,14 @@ fun HomePageScreen(
                 username = userInformation?.fullName ?: "EMPTY",
                 userImage = userImage
             )
-//            Text(
-//                text = userInformation.toString()
-//            )
+
+            JobList(
+                jobs = state.jobList,
+                onUserClicked = {
+                    navController.navigate("jobs/" + it)
+                }
+            )
+
         } else {
             Text(
                 text = state.error
