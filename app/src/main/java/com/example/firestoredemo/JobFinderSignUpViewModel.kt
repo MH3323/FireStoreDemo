@@ -4,21 +4,14 @@ import android.content.ContentValues.TAG
 import android.graphics.Bitmap
 import android.net.Uri
 import android.util.Log
-import android.widget.Toast
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
 
 data class SignUpState(
     val fullname: String = "",
@@ -32,13 +25,15 @@ data class SignUpState(
     val imgUrl: String? = null
 )
 
-class SignUpViewModel : ViewModel(){
+
+class JobFinderSignUpViewModel : ViewModel(){
     val auth = Firebase.auth
     val db = Firebase.firestore
     val state = mutableStateOf(SignUpState())
 //    val selectedImage = mutableStateOf<Bitmap?>(null)
 
     private val _imgUrl = MutableStateFlow<String?>(null)
+
     val imgUrl: StateFlow<String?>
         get() = _imgUrl
 

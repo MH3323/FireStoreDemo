@@ -4,6 +4,7 @@ import android.content.ContentResolver
 import android.content.ContentValues.TAG
 import android.net.Uri
 import android.util.Log
+import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.ktx.Firebase
@@ -101,31 +102,6 @@ fun uploadImageToFirebase(
         }
 }
 
-//fun getImageFromFirebase(
-//    imageUrl: String,
-//    onImageFetched: (Bitmap) -> Unit
-//) {
-//        GlobalScope.launch(Dispatchers.IO) {
-//            Log.d("userimage", "in getImageFromFirebase: " + imageUrl)
-//            val storageReference = Firebase.storage.reference.child(imageUrl)
-//            val maxImageSize: Long = 1024 * 1024 * 5 // max 5MB
-//            storageReference.getBytes(maxImageSize)
-//                .addOnSuccessListener {
-//                    val byteArray = it
-//                    val bitmap = byteArrayToBitmap(byteArray)
-//                    onImageFetched(bitmap)
-//                    Log.d("userimage", "successfully")
-//                }
-//                .addOnFailureListener { e ->
-//                    Log.d("userimage", e.toString())
-//                }
-//        }
-//}
-
-//fun byteArrayToBitmap(byteArray: ByteArray): Bitmap {
-//    return BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
-//}
-
 fun getCompanyInformationFromFirebase(
     companyId: String,
     onSuccess: (Company?) -> Unit,
@@ -188,6 +164,31 @@ fun getJobByIdFromFirebase(
         }
 }
 
+fun signInUsingFirebaseEmailPasswordAuthentication(
+    email: String,
+    password: String,
+    goToHomePage: () -> Unit,
+    setError: (String) -> Unit
+) {
+    val auth = Firebase.auth
+
+    auth.signInWithEmailAndPassword(email, password)
+        .addOnCompleteListener { task ->
+            Log.d("login", "succesfully")
+
+            if (auth.currentUser?.isEmailVerified() == true) {
+                goToHomePage()
+
+
+            } else {
+                setError("Please confirm your email")
+            }
+        }
+        .addOnFailureListener { e ->
+            Log.d("login", e.toString())
+            setError(e.toString())
+        }
+}
 
 
 

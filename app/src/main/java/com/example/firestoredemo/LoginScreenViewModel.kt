@@ -48,43 +48,14 @@ public class LoginScreenViewModel : ViewModel() {
     fun login(
         goToHomePage: () -> Unit
     ) {
-        auth.signInWithEmailAndPassword(state.value.email, state.value.password)
-            .addOnCompleteListener { task ->
-                if (auth.currentUser?.isEmailVerified() == true) {
-                    if (task.isSuccessful) {
-                        Log.d(TAG, "Successfully log in")
-                        val temp = auth.currentUser
-                        if (temp != null) {
-                            val uid = temp.uid
-                            db.collection("user").document(uid).get()
-                                .addOnSuccessListener { documentSnapshot ->
-                                    if (documentSnapshot.exists()) {
-                                        // The document exists, you can access its data
-                                        // Handle the data as needed
-                                        val user = documentSnapshot.toObject(User::class.java)
-                                    } else {
-                                        // The document doesn't exist
-                                        // Handle this case if needed
-                                    }
-                                }
-                                .addOnFailureListener { exception ->
-                                    // Handle any errors that occurred while fetching the document
-                                }
-                            goToHomePage()
-                        }
-                    } else {
-                        val exception = task.exception
-                        Log.d(TAG, exception.toString())
-                        setError(exception.toString())
-                    }
-                } else {
-                    setError("Please confirm your email")
-                }
-            }
-            .addOnFailureListener { e ->
-                Log.d(TAG, e.toString())
-                setError(e.toString())
-            }
+        signInUsingFirebaseEmailPasswordAuthentication(
+            email = state.value.email,
+            password = state.value.password,
+            setError = {
+                       setError(it)
+            },
+            goToHomePage = goToHomePage
+        )
     }
 
 }

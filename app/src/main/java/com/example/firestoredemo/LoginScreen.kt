@@ -94,6 +94,7 @@ fun LoginScreen(
             Log.d("login", state.password)
 
             if (loginScreenViewModel.verify()) {
+                Log.d("login", "verify successfully")
                 loginScreenViewModel.login{
                     navController.navigate("loginSuccessfullyScreen")
                 }

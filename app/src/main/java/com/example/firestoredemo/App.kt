@@ -24,6 +24,8 @@ fun App() {
         addLoginSuccessfullyScreen(navController = navController)
         addSignUpSuccessfullyScreen(navController = navController)
         addJob(navController = navController)
+        addJobFinderSignUpScreen(navController = navController)
+        addEmployerSignUpScreen(navController = navController)
     }
 }
 
@@ -39,9 +41,7 @@ private fun NavGraphBuilder.addLoginScreen(navController: NavController) {
 
 private fun NavGraphBuilder.addSignUpScreen(navController: NavController) {
     composable("signUpScreen") {
-        val signUpViewModel = viewModel<SignUpViewModel>()
         SignUpScreen(
-            signUpViewModel = signUpViewModel,
             navController = navController,
         )
     }
@@ -91,5 +91,27 @@ private fun NavGraphBuilder.addJob(
     ) { backStackEntry ->
         val jobId = backStackEntry.arguments?.getString("jobId") ?: ""
         JobDetailScreen(jobId = jobId)
+    }
+}
+
+private fun NavGraphBuilder.addJobFinderSignUpScreen(
+    navController: NavController
+) {
+    composable(
+        route = "jobFinderSignUpScreen"
+    ) {
+        JobFinderSignUpScreen(
+            navController = navController
+        )
+    }
+}
+
+private fun NavGraphBuilder.addEmployerSignUpScreen(
+    navController: NavController
+) {
+    composable(
+        route = "employerSignUpScreen"
+    ) {
+        EmployerSignUpScreen()
     }
 }
