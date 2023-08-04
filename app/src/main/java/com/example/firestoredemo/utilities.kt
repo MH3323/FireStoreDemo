@@ -110,18 +110,17 @@ fun getCompanyInformationFromFirebase(
     val companyDocumentPath = "companies/$companyId"
     val db = Firebase.firestore
 
-    db.document(companyDocumentPath).get()
-        .addOnSuccessListener { documentSnapshot ->
-            if (documentSnapshot.exists()) {
+    db.document(companyDocumentPath).addSnapshotListener { documentSnapshot, error ->
+            if (documentSnapshot != null) {
                 val companyInformation = documentSnapshot.toObject(Company::class.java)
                 onSuccess(companyInformation)
             } else {
-                onFailure("Document does not exist")
+                onFailure("Document does not exist " + error.toString())
             }
         }
-        .addOnFailureListener {
-            onFailure(it.toString())
-        }
+//        .addOnFailureListener {
+//            onFailure(it.toString())
+//        }
 }
 
 fun getJobListFromFirebase(

@@ -3,6 +3,7 @@ package com.example.firestoredemo
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
@@ -10,8 +11,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.pullrefresh.PullRefreshIndicator
+import androidx.compose.material.pullrefresh.pullRefresh
+import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -22,6 +27,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.painter.Painter
@@ -168,7 +174,7 @@ fun JobCard(
         }
 }
 
-
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun HomePageScreen(
     homePageViewModel: HomePageViewModel = viewModel<HomePageViewModel>(),
@@ -176,32 +182,39 @@ fun HomePageScreen(
 ) {
     val state = homePageViewModel.state.value
     val currentUser = Firebase.auth.currentUser
+    val isLoading by homePageViewModel.isLoading.collectAsState()
+    val pullRefreshState = rememberPullRefreshState(isLoading, { homePageViewModel.loadStuff()})
 
+    Box(
 
-    Column {
-        if (currentUser != null) {
-            homePageViewModel.getUserInformation(currentUser.uid)
-            val userInformation by homePageViewModel.userInformation.collectAsState()
-            val userImage by homePageViewModel.userImage.collectAsState()
+        modifier = Modifier.pullRefresh(pullRefreshState)
+    ) {
+        Column (
+                    ){
+                if (currentUser != null) {
+                    homePageViewModel.getUserInformation(currentUser.uid)
+                    val userInformation by homePageViewModel.userInformation.collectAsState()
+                    val userImage by homePageViewModel.userImage.collectAsState()
 
-            AppBarWithUserImage(
-                username = userInformation?.fullName ?: "EMPTY",
-                userImage = userImage
-            )
+                    AppBarWithUserImage(
+                        username = userInformation?.fullName ?: "EMPTY",
+                        userImage = userImage
+                    )
 
-            JobList(
-                jobs = state.jobList,
-                onUserClicked = {
-                    navController.navigate("jobs/" + it)
+                    JobList(
+                        jobs = state.jobList,
+                        onUserClicked = {
+                            navController.navigate("jobs/" + it)
+                        }
+                    )
+
+                } else {
+                    Text(
+                        text = state.error
+                    )
                 }
-            )
-
-        } else {
-            Text(
-                text = state.error
-            )
+            }
+                PullRefreshIndicator(isLoading, pullRefreshState, Modifier.align(Alignment.TopCenter))
         }
-    }
-
 }
 

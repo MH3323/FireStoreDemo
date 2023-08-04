@@ -3,10 +3,14 @@ package com.example.firestoredemo
 import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 
 data class HomePageState(
     val error: String = "",
@@ -15,6 +19,10 @@ data class HomePageState(
 
 class HomePageViewModel : ViewModel() {
     val state = mutableStateOf<HomePageState>(HomePageState())
+
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading = _isLoading.asStateFlow()
+
 
     private val _userImage = MutableStateFlow<String?>(null)
     val userImage: StateFlow<String?>
@@ -26,17 +34,29 @@ class HomePageViewModel : ViewModel() {
 
     private val db = Firebase.firestore
 
-    init {
-        getJobListFromFirebase(
-            onSuccess = {
-                state.value = state.value.copy(
-                    jobList = it
-                )
-            },
-            onFailure = {
-                Log.d("Job List", it)
+    fun loadStuff() {
+        viewModelScope.launch {
+            _isLoading.value = true
+            delay(500L)
+            _isLoading.value = false
+
+            getJobListFromFirebase(
+                onSuccess = {
+                    state.value = state.value.copy(
+                        jobList = it
+                    )
+                },
+                onFailure = {
+                    Log.d("Job List", it)
             }
         )
+        }
+    }
+
+    init {
+         loadStuff()
+
+
     }
 
     fun getUserInformation(uid: String) {
