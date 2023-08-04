@@ -1,6 +1,12 @@
 package com.example.firestoredemo
 
+import android.content.Intent
+import android.net.Uri
 import android.util.Log
+import androidx.activity.compose.ManagedActivityResultLauncher
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -27,6 +33,11 @@ class HomePageViewModel : ViewModel() {
     private val _userImage = MutableStateFlow<String?>(null)
     val userImage: StateFlow<String?>
         get() = _userImage
+
+    private val _cv = MutableStateFlow<Uri?>(null)
+
+    val cv: StateFlow<Uri?>
+        get() = _cv
 
     private val _userInformation = MutableStateFlow<User?>(null)
     val userInformation: StateFlow<User?>
@@ -55,8 +66,22 @@ class HomePageViewModel : ViewModel() {
 
     init {
          loadStuff()
+    }
 
+    fun setCV(uri: Uri) {
+        _cv.value = uri
+    }
 
+    fun uploadPDF() {
+        uploadPDFToFirebase(
+            cv.value,
+            onSuccess = { it ->
+                Log.d("PDF", "Here is the download link of pdf " + it)
+            },
+            onFailure = { error ->
+                Log.d("PDF", error)
+            }
+        )
     }
 
     fun getUserInformation(uid: String) {

@@ -102,6 +102,34 @@ fun uploadImageToFirebase(
         }
 }
 
+fun uploadPDFToFirebase(
+//    contentResolver: ContentResolver,
+    pdfUri: Uri?,
+    onSuccess: (String?) -> Unit,
+    onFailure: (String) -> Unit
+) {
+    if (pdfUri != null) {
+        val fileName = "cv_${System.currentTimeMillis()}.pdf"
+
+        val storageRef = Firebase.storage.reference.child("pdf/${fileName}")
+
+        val pdfRef = storageRef.putFile(pdfUri).addOnSuccessListener() {
+            storageRef.downloadUrl.addOnSuccessListener {
+                Log.d("PDF", "Successfully get download link")
+                val downloadUrl = it.toString()
+                onSuccess(downloadUrl)
+            }.addOnFailureListener {
+                onFailure("Failed to get Download link")
+            }
+        }.addOnFailureListener {
+            onFailure("Can not add PDF to Firebase Storage")
+        }
+    }
+    else {
+        onFailure("Pdf Uri is empty")
+    }
+}
+
 fun getCompanyInformationFromFirebase(
     companyId: String,
     onSuccess: (Company?) -> Unit,

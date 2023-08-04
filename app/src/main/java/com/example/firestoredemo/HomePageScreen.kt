@@ -1,16 +1,24 @@
 package com.example.firestoredemo
 
+import android.net.Uri
 import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.Button
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
@@ -76,6 +84,7 @@ fun JobList(
     jobs: List<Job>,
     onUserClicked: (String) -> Unit,
     modifier: Modifier = Modifier
+        .height(250.dp)
 ) {
     LazyColumn(
         modifier = modifier
@@ -174,6 +183,28 @@ fun JobCard(
         }
 }
 
+@Composable
+fun PDFSelectButton(
+    setPdfUri: (Uri) -> Unit,
+    uploadPDFToFirebase: () -> Unit
+) {
+
+    val pickPDFLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+            uri?.let {
+                Log.d("PDF", uri.toString())
+                setPdfUri(uri)
+
+                uploadPDFToFirebase()
+            }
+    }
+
+    Button(onClick = {
+        pickPDFLauncher.launch("application/pdf")
+    }) {
+        Text(text = "Select PDF")
+    }
+}
+
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun HomePageScreen(
@@ -182,15 +213,16 @@ fun HomePageScreen(
 ) {
     val state = homePageViewModel.state.value
     val currentUser = Firebase.auth.currentUser
+
     val isLoading by homePageViewModel.isLoading.collectAsState()
     val pullRefreshState = rememberPullRefreshState(isLoading, { homePageViewModel.loadStuff()})
 
     Box(
-
-        modifier = Modifier.pullRefresh(pullRefreshState)
+        modifier = Modifier
+            .pullRefresh(pullRefreshState)
+            .fillMaxSize()
     ) {
-        Column (
-                    ){
+        Column {
                 if (currentUser != null) {
                     homePageViewModel.getUserInformation(currentUser.uid)
                     val userInformation by homePageViewModel.userInformation.collectAsState()
@@ -208,6 +240,14 @@ fun HomePageScreen(
                         }
                     )
 
+                    PDFSelectButton(
+                        setPdfUri = { uri ->
+                            homePageViewModel.setCV(uri)
+                        },
+                        uploadPDFToFirebase = {
+                            homePageViewModel.uploadPDF()
+                        }
+                    )
                 } else {
                     Text(
                         text = state.error

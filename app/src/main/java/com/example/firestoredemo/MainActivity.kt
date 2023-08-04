@@ -7,6 +7,7 @@ import android.service.controls.ControlsProviderService.TAG
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
@@ -23,6 +24,8 @@ import com.google.firebase.ktx.Firebase
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+
             setContent {
 
                 FireStoreDemoTheme {
@@ -36,7 +39,12 @@ class MainActivity : ComponentActivity() {
                 }
         }
     }
+
+
+
 }
+
+
 
 @Composable
 fun Greeting(name: String, modifier: Modifier = Modifier) {
