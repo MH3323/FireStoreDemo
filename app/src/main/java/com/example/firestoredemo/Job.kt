@@ -19,6 +19,18 @@ class Job (
             )
         }
     }
+
+    fun doesMatchSearchQuery(query: String): Boolean {
+        val matchingCombinations = listOf(
+            "$name",
+            "$description",
+            "$companyName"
+        )
+
+        return matchingCombinations.any {
+            it.contains(query, ignoreCase = true)
+        }
+    }
 }
 
 
